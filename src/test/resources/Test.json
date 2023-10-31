@@ -1,0 +1,11 @@
+{
+  "name" : "Alexandr",
+  "surname" : "Volkov",
+  "yearOfBirth": 1990,
+  "skills": [
+    "English",
+    "Communication",
+    "Teamwork",
+    "Data Analysis"
+  ]
+}
