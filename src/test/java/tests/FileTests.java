@@ -69,11 +69,10 @@ public class FileTests {
                 String name = entry.getName();
                 if (name.equals("List.xls")){
                     XLS xls = new XLS(zis);
-                    Assertions.assertEquals("Mexico",
-                            xls.excel.getSheet("Sheet1")
-                                    .getRow(5)
-                                    .getCell(1)
-                                    .getStringCellValue());
+                    assertThat(xls.excel.getSheet("Sheet1")
+                            .getRow(5)
+                            .getCell(1)
+                            .getStringCellValue()).isEqualTo("Mexico");
                     break;
                 }
             }
