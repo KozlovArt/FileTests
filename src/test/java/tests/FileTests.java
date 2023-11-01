@@ -19,13 +19,14 @@ import java.util.zip.ZipInputStream;
 
 import static com.codeborne.pdftest.PDF.containsText;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FileTests {
     ClassLoader cl = FileTests.class.getClassLoader();
     ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void zipTest() throws Exception {
+    void csvZipTest() throws Exception {
         try (InputStream stream = cl.getResourceAsStream("Test.zip");
              ZipInputStream zis = new ZipInputStream(stream)) {
 
@@ -36,27 +37,47 @@ public class FileTests {
                     CSVReader csvReader = new CSVReader(new InputStreamReader(zis));
                     List<String[]> content = csvReader.readAll();
                     String[] firstRow = content.get(0);
-                    Assertions.assertArrayEquals(new String[] {"Name","Job Title",
-                            "Address","State","City"}, firstRow);
-                    continue;
+                    assertThat(firstRow).isEqualTo(new String[] {"Name","Job Title",
+                            "Address","State","City"});
+                    break;
                 }
-                if (name.equals("Test.pdf")){
-                    PDF pdf = new PDF(zis);
-                    assertThat(pdf, containsText("Introduction"));
-                    continue;
-                }
-                if (name.equals("List.xls")){
-                    XLS xls = new XLS(zis);
-                    Assertions.assertEquals("Mexico",
-                                    xls.excel.getSheet("Sheet1")
-                                             .getRow(5)
-                                             .getCell(1)
-                                             .getStringCellValue());
-                }
-
             }
         }
 
+    }
+    @Test
+    void pdfFromZipTest() throws Exception {
+        try (InputStream stream = cl.getResourceAsStream("Test.zip");
+             ZipInputStream zis = new ZipInputStream(stream)) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                String name = entry.getName();
+                if (name.equals("Test.pdf")) {
+                    PDF pdf = new PDF(zis);
+                    assertThat(pdf, containsText("Introduction"));
+                    break;
+                }
+            }
+        }
+    }
+    @Test
+    void xlsFromZipTest() throws Exception {
+        try (InputStream stream = cl.getResourceAsStream("Test.zip");
+             ZipInputStream zis = new ZipInputStream(stream)) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                String name = entry.getName();
+                if (name.equals("List.xls")){
+                    XLS xls = new XLS(zis);
+                    Assertions.assertEquals("Mexico",
+                            xls.excel.getSheet("Sheet1")
+                                    .getRow(5)
+                                    .getCell(1)
+                                    .getStringCellValue());
+                    break;
+                }
+            }
+        }
     }
 
     @Test
@@ -65,10 +86,10 @@ public class FileTests {
              InputStreamReader reader = new InputStreamReader(is)) {
             ResumeModel resumeModel = mapper.readValue(reader, ResumeModel.class);
 
-            Assertions.assertEquals("Alexandr", resumeModel.getName());
-            Assertions.assertEquals("Volkov", resumeModel.getSurname());
-            Assertions.assertEquals(1990, resumeModel.getYearOfBirth());
-            Assertions.assertEquals(resumeModel.getSkills().get(1), "Communication");
+            assertThat(resumeModel.getName()).isEqualTo("Alexandr");
+            assertThat(resumeModel.getSurname()).isEqualTo("Volkov");
+            assertThat(resumeModel.getYearOfBirth()).isEqualTo(1990);
+            assertThat(resumeModel.getSkills().get(1)).isEqualTo("Communication");
         }
     }
 }
